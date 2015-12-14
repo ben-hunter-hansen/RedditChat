@@ -1,0 +1,28 @@
+<nav class="navbar navbar-default navbar-fixed-top" ng-if="isLoggedIn()">
+    <div class="container">
+        <div class="navbar-header">
+            <div class="col-xs-3">
+                <p class="navbar-text">
+                    <a href="" ng-click="logout()" class="navbar-link">logout</a>
+                </p>
+            </div>
+            <div class="col-xs-3">
+                <p class="navbar-text">
+                    <a href="" ng-click="navigateTo(Views.Home)" class="navbar-link">home</a>
+                </p>
+            </div>
+            <div class="col-xs-3">
+                <p class="navbar-text">
+                    <a href=""  ng-click="navigateTo(Views.SubReddits)" class="navbar-link">subreddits</a>
+                </p>
+            </div>
+            <div class="col-xs-3">
+                <p class="navbar-text">
+                    <a href=""  ng-click="navigateTo(Views.Conversations)" class="navbar-link">conversations</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div style="height: 70px; width: 100%" ng-if="isLoggedIn()"></div>
