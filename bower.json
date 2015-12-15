@@ -1,0 +1,24 @@
+{
+  "name": "reddit-chat",
+  "description": "",
+  "main": "Gruntfile.js",
+  "authors": [
+    "ben-hunter-hansen <ben.hunter.hansen@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/ben-hunter-hansen/RedditChat",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "angularjs#~1.4.8",
+    "signalr": "~2.2.0",
+    "bootstrap": "~3.3.6",
+    "angular-route": "~1.4.8"
+  }
+}
