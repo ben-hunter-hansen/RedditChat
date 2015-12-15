@@ -11,7 +11,7 @@ let SignalR = ['$','ChatAPI', ($, ChatAPI) => {
         connection = $.hubConnection(ChatAPI.Url, ChatAPI.Config);
         proxy = connection.createHubProxy(ChatAPI.HubName);
 
-        return new Promise((resolve,reject) => {
+        return new Promise((resolve, reject) => {
             connection.start().done(() => {
                 resolve({status: "Connected sucessfully"});
             }).fail((err) => {

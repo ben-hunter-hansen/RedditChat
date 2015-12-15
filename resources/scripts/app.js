@@ -64,10 +64,22 @@ let ConversationCtrl = ['$scope', ($scope) => {
 
 let HomeCtrl = ['$scope','AuthService','SignalR','Logger', ($scope, AuthService, SignalR, Logger) => {
     $scope.user = AuthService.getUser();
-
     SignalR.connect().then(() => {
         SignalR.greetAll($scope.user.name);
-    }).catch((err) => Logger.info(err));
+    }).catch((err) => Logger.warn(err));
+}];
+/**
+ * Created by ben on 12/14/15.
+ */
+let Logger = [() => {
+    let service = {},
+        background = chrome.extension.getBackgroundPage();
+
+    service.log  = (msg) => background.console.log(msg);
+    service.debug = (msg) => background.console.debug(msg);
+    service.warn = (msg) => background.console.warn(msg);
+    service.error = (msg) => background.console.error(msg);
+    return service;
 }];
 /**
  * Created by ben on 12/12/15.
@@ -104,25 +116,23 @@ let SignOnCtrl = ['$scope', '$location','AuthService','Views', ($scope, $locatio
     $scope.err = {};
     $scope.signIn = (user) => {
         AuthService.setUser(user);
-       /* AuthService.logIn(user.name, user.password).then((res) => {
-            chrome.extension.getBackgroundPage().console.log(res);
-        });*/
         $location.path(Views.Home);
     }
 }];
 /**
  * Created by ben on 12/13/15.
  */
-let SignalR = ['$','$rootScope', ($, $rootScope) => {
+let SignalR = ['$','ChatAPI', ($, ChatAPI) => {
     let service = {},
         connection = {},
         proxy = {};
 
     service.connect = () => {
-        connection = $.hubConnection('http://localhost:8080/signalr', { useDefaultPath: false });
-        proxy = connection.createHubProxy('myHub');
 
-        return new Promise((resolve,reject) => {
+        connection = $.hubConnection(ChatAPI.Url, ChatAPI.Config);
+        proxy = connection.createHubProxy(ChatAPI.HubName);
+
+        return new Promise((resolve, reject) => {
             connection.start().done(() => {
                 resolve({status: "Connected sucessfully"});
             }).fail((err) => {
@@ -166,10 +176,18 @@ const RedditChatApp =
     ])
     .config(AppConfig)
     .factory('AuthService', AuthService)
+    .factory('Logger', Logger)
     .directive('navBar', NavBar)
     .service('SignalR', SignalR)
     .constant('Storage', {
         UserKey: 'RedditChat_USR'
+    })
+    .constant('ChatAPI', {
+        Url: 'http://localhost:8080/signalr',
+        Config: {
+            useDefaultPath: false
+        },
+        HubName: 'chatHub'
     })
     .constant('Views', {
         Home: '/home',
@@ -178,5 +196,4 @@ const RedditChatApp =
         Conversations: '/conversations'
     })
     .value('$', $)
-    .value('Logger', chrome.extension.getBackgroundPage().console)
     .run(AppStart);

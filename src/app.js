@@ -10,6 +10,7 @@ const RedditChatApp =
     ])
     .config(AppConfig)
     .factory('AuthService', AuthService)
+    .factory('Logger', Logger)
     .directive('navBar', NavBar)
     .service('SignalR', SignalR)
     .constant('Storage', {
@@ -20,7 +21,7 @@ const RedditChatApp =
         Config: {
             useDefaultPath: false
         },
-        HubName: 'myHub'
+        HubName: 'chatHub'
     })
     .constant('Views', {
         Home: '/home',
@@ -29,5 +30,4 @@ const RedditChatApp =
         Conversations: '/conversations'
     })
     .value('$', $)
-    .value('Logger', chrome.extension.getBackgroundPage().console)
     .run(AppStart);
