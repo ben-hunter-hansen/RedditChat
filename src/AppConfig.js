@@ -9,7 +9,12 @@ let AppConfig = ['$routeProvider', $routeProvider => {
         .when('/signon',{
             templateUrl: 'signon.html',
             controller: SignOnCtrl
-        }).when('/home', {
+        })
+        .when('/signon/confirm',{
+            templateUrl: 'reddit-auth.html',
+            controller: RedditAuthCtrl
+        })
+        .when('/home', {
             templateUrl: 'home.html',
             controller: HomeCtrl
         }).when('/subreddits', {

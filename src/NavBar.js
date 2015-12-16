@@ -10,7 +10,9 @@ let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location
         templateUrl: 'navbar.html',
         link: (scope,elem,attrs) => {
             scope.Views = Views;
-            scope.isLoggedIn = _ => $location.path() !== Views.SignOn;
+            scope.isLoggedIn = () => {
+                return ($location.path() !== Views.SignOn) && ($location.path() !== Views.ConfirmSignOn);
+            };
             scope.navigateTo = view => $location.path(view);
             scope.logout = () => {
                 AuthService.logout();

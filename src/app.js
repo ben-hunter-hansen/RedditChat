@@ -22,6 +22,7 @@ const RedditChatApp =
     .factory('AuthService', AuthService)
     .factory('Logger', Logger)
     .directive('navBar', NavBar)
+    .directive('authWebView', AuthWebView)
     .service('SignalR', SignalR)
     .constant('Storage', {
         UserKey: 'RedditChat_USR',
@@ -34,9 +35,14 @@ const RedditChatApp =
         },
         HubName: 'chatHub'
     })
+    .constant('AuthAPI', {
+        Url: 'http://localhost:3000/authorize',
+        SuccessCallback: 'http://localhost:3000/authorize/reddit_callback'
+    })
     .constant('Views', {
         Home: '/home',
         SignOn: '/signon',
+        ConfirmSignOn: '/signon/confirm',
         SubReddits: '/subreddits',
         Conversations: '/conversations'
     })

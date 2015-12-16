@@ -3,7 +3,7 @@
  */
 'use strict';
 
-let AuthService = ['Storage','Logger', (Storage,Logger) => {
+let AuthService = ['Storage','Logger','AuthAPI','$http', (Storage,Logger, AuthAPI, $http) => {
     let service = {};
     service._user = null;
 
@@ -25,6 +25,12 @@ let AuthService = ['Storage','Logger', (Storage,Logger) => {
         Storage.Local.get(Storage.UserKey, (data) => {
             delete data[Storage.UserKey];
             Storage.Local.set(data);
+        });
+    };
+
+    service.getOauthUrl = _ => {
+        return new Promise((resolve,reject) => {
+            $http.get(AuthAPI.Url).then((res) => resolve(res.data));
         });
     };
 

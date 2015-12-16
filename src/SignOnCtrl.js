@@ -4,10 +4,10 @@
 'use strict';
 
 
-let SignOnCtrl = ['$scope', '$location','AuthService','Views','$http','Logger', ($scope, $location, AuthService, Views, $http, Logger) => {
+let SignOnCtrl = ['$scope', '$location','AuthService','Views','$sce', ($scope, $location, AuthService, Views, $sce) => {
     $scope.user = { name: "" , password: ""};
     $scope.signIn = (user) => {
         AuthService.setUser(user);
-        $location.path(Views.Home);
+        $location.path(Views.ConfirmSignOn);
     }
 }];
