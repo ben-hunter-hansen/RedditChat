@@ -20,13 +20,14 @@ let AppConfig = ['$routeProvider', $routeProvider => {
             controller: ConversationCtrl
         }).when('/subreddits/:which', {
             template: '<h1> /r/somesub </h1>'
-        }).otherwise({redirectTo: '/home'});
+        }).otherwise({redirectTo: '/signon'});
 }];
 
-let AppStart = ['AuthService', '$location','$rootScope','Views', (AuthService,$location,$rootScope,Views) => {
+let AppStart = ['AuthService', '$location','$rootScope','Views','Logger', (AuthService,$location,$rootScope,Views,Logger) => {
+
     $rootScope.$on('$routeChangeStart', () => {
-        if(!AuthService.isLoggedIn()) {
-            $location.path(Views.SignOn);
-        }
-    })
+        AuthService.getUser().then((user) => {
+            if(!user) $location.path(Views.SignOn);
+        });
+    });
 }];

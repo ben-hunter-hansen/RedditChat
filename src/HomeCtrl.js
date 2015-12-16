@@ -5,8 +5,10 @@
 
 
 let HomeCtrl = ['$scope','AuthService','SignalR','Logger', ($scope, AuthService, SignalR, Logger) => {
-    $scope.user = AuthService.getUser();
-    SignalR.connect().then(() => {
-        SignalR.greetAll($scope.user.name);
-    }).catch((err) => Logger.warn(err));
+    AuthService.getUser().then((user) => {
+        $scope.user = user;
+    });
+    //SignalR.connect().then(() => {
+    //    SignalR.greetAll($scope.user.name);
+    //}).catch((err) => Logger.warn(err));
 }];

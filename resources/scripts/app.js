@@ -20,30 +20,46 @@ let AppConfig = ['$routeProvider', $routeProvider => {
             controller: ConversationCtrl
         }).when('/subreddits/:which', {
             template: '<h1> /r/somesub </h1>'
-        }).otherwise({redirectTo: '/home'});
+        }).otherwise({redirectTo: '/signon'});
 }];
 
-let AppStart = ['AuthService', '$location','$rootScope','Views', (AuthService,$location,$rootScope,Views) => {
+let AppStart = ['AuthService', '$location','$rootScope','Views','Logger', (AuthService,$location,$rootScope,Views,Logger) => {
+
     $rootScope.$on('$routeChangeStart', () => {
-        if(!AuthService.isLoggedIn()) {
-            $location.path(Views.SignOn);
-        }
-    })
+        AuthService.getUser().then((user) => {
+            if(!user) $location.path(Views.SignOn);
+        });
+    });
 }];
 /**
  * Created by ben on 12/12/15.
  */
 'use strict';
 
-
-
-let AuthService = ['Storage','$http', (Storage,$http) => {
+let AuthService = ['Storage','Logger', (Storage,Logger) => {
     let service = {};
+    service._user = null;
 
-    service.setUser = user => window.localStorage.setItem(Storage.UserKey, JSON.stringify(user));
-    service.getUser = _ => JSON.parse(window.localStorage.getItem(Storage.UserKey)) || {};
-    service.isLoggedIn = _ => !!window.localStorage.getItem(Storage.UserKey);
-    service.logout = _ => window.localStorage.removeItem(Storage.UserKey);
+    service.setUser = (user) => {
+        let data = {};
+        data[Storage.UserKey] = user;
+        Storage.Local.set(data);
+    };
+
+    service.getUser = () => {
+        return new Promise((resolve,reject) => {
+            Storage.Local.get(Storage.UserKey, (data) => {
+                resolve(data[Storage.UserKey]);
+            });
+        });
+    };
+
+    service.logout = () => {
+        Storage.Local.get(Storage.UserKey, (data) => {
+            delete data[Storage.UserKey];
+            Storage.Local.set(data);
+        });
+    };
 
     return service;
 }];
@@ -63,22 +79,23 @@ let ConversationCtrl = ['$scope', ($scope) => {
 
 
 let HomeCtrl = ['$scope','AuthService','SignalR','Logger', ($scope, AuthService, SignalR, Logger) => {
-    $scope.user = AuthService.getUser();
-    SignalR.connect().then(() => {
-        SignalR.greetAll($scope.user.name);
-    }).catch((err) => Logger.warn(err));
+    AuthService.getUser().then((user) => {
+        $scope.user = user;
+    });
+    //SignalR.connect().then(() => {
+    //    SignalR.greetAll($scope.user.name);
+    //}).catch((err) => Logger.warn(err));
 }];
 /**
  * Created by ben on 12/14/15.
  */
 let Logger = [() => {
-    let service = {},
-        background = chrome.extension.getBackgroundPage();
+    let service = {};
 
-    service.log  = (msg) => background.console.log(msg);
-    service.debug = (msg) => background.console.debug(msg);
-    service.warn = (msg) => background.console.warn(msg);
-    service.error = (msg) => background.console.error(msg);
+    service.log  = (msg) => console.log(msg);
+    service.debug = (msg) => console.debug(msg);
+    service.warn = (msg) => console.warn(msg);
+    service.error = (msg) => console.error(msg);
     return service;
 }];
 /**
@@ -93,8 +110,7 @@ let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location
         templateUrl: 'navbar.html',
         link: (scope,elem,attrs) => {
             scope.Views = Views;
-            scope.isLoggedIn = AuthService.isLoggedIn;
-            scope.getUser = AuthService.getUser;
+            scope.isLoggedIn = _ => $location.path() !== Views.SignOn;
             scope.navigateTo = view => $location.path(view);
             scope.logout = () => {
                 AuthService.logout();
@@ -109,11 +125,8 @@ let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location
 'use strict';
 
 
-let SignOnCtrl = ['$scope', '$location','AuthService','Views', ($scope, $location, AuthService, Views) => {
-    if(AuthService.isLoggedIn()) $location.path(Views.Home);
-
+let SignOnCtrl = ['$scope', '$location','AuthService','Views','$http','Logger', ($scope, $location, AuthService, Views, $http, Logger) => {
     $scope.user = { name: "" , password: ""};
-    $scope.err = {};
     $scope.signIn = (user) => {
         AuthService.setUser(user);
         $location.path(Views.Home);
@@ -173,14 +186,25 @@ let SubRedditCtrl = ['$scope','$location', ($scope, $location) => {
 const RedditChatApp =
     angular.module('RedditChat', [
         'ngRoute'
-    ])
+    ], ($provide) => {
+
+        // The history.pushState API isn't available to chrome packaged apps.
+        // The following few lines are a hack to suppress the error.
+        // https://github.com/angular/angular.js/issues/11932
+
+        $provide.decorator('$window',($delegate) => {
+            $delegate.history = null;
+            return $delegate;
+        });
+    })
     .config(AppConfig)
     .factory('AuthService', AuthService)
     .factory('Logger', Logger)
     .directive('navBar', NavBar)
     .service('SignalR', SignalR)
     .constant('Storage', {
-        UserKey: 'RedditChat_USR'
+        UserKey: 'RedditChat_USR',
+        Local: chrome.storage.local
     })
     .constant('ChatAPI', {
         Url: 'http://localhost:8080/signalr',
