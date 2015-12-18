@@ -28,47 +28,32 @@ let AppConfig = ['$routeProvider', $routeProvider => {
         }).otherwise({redirectTo: '/signon'});
 }];
 
-let AppStart = ['AuthService', '$location','$rootScope','Views','Logger', (AuthService,$location,$rootScope,Views,Logger) => {
+let AppStart = ['UserService', '$location','$rootScope','Views','Logger', (UserService,$location,$rootScope,Views,Logger) => {
 
-    $rootScope.$on('$routeChangeStart', () => {
-        AuthService.getUser().then((user) => {
-            if(!user) $location.path(Views.SignOn);
-        });
-    });
 }];
 /**
  * Created by ben on 12/12/15.
  */
 'use strict';
 
-let AuthService = ['Storage','Logger','AuthAPI','$http', (Storage,Logger, AuthAPI, $http) => {
+let AuthService = ['Storage','Logger','AuthAPI','$http','UserService', (Storage,Logger, AuthAPI, $http,UserService) => {
     let service = {};
-    service._user = null;
-
-    service.setUser = (user) => {
-        let data = {};
-        data[Storage.UserKey] = user;
-        Storage.Local.set(data);
-    };
-
-    service.getUser = () => {
-        return new Promise((resolve,reject) => {
-            Storage.Local.get(Storage.UserKey, (data) => {
-                resolve(data[Storage.UserKey]);
-            });
-        });
-    };
-
-    service.logout = () => {
-        Storage.Local.get(Storage.UserKey, (data) => {
-            delete data[Storage.UserKey];
-            Storage.Local.set(data);
-        });
-    };
 
     service.getOauthUrl = _ => {
         return new Promise((resolve,reject) => {
-            $http.get(AuthAPI.Url).then((res) => resolve(res.data));
+            $http.get(AuthAPI.InitialReqUrl).then((res) => resolve(res.data));
+        });
+    };
+
+    service.getAccessToken = code => {
+        return new Promise((resolve,reject) => {
+            $http.put(AuthAPI.AccessTokenUrl,{"code":code}).then((res) => {
+                $http.get(AuthAPI.AccessTokenUrl).then((res) => {
+                    UserService.login().then((res) => {
+                        resolve(res);
+                    });
+                });
+            });
         });
     };
 
@@ -77,23 +62,31 @@ let AuthService = ['Storage','Logger','AuthAPI','$http', (Storage,Logger, AuthAP
 /**
  * Created by ben on 12/16/15.
  */
-let AuthWebView = ['$location','Views','AuthAPI','AuthService',($location, Views, AuthAPI, AuthService) => {
+
+let AuthWebView = ['$location','Views','AuthAPI','AuthService','Logger',($location, Views, AuthAPI, AuthService, Logger) => {
     "use strict";
 
     return {
         restrict: 'A',
         link: (scope,elem,attrs) => {
+
+            var getQueryString = function ( field, url ) {
+                var href = url ? url : window.location.href;
+                var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+                var string = reg.exec(href);
+                return string ? string[1] : null;
+            };
+
             elem[0].addEventListener('contentload', () => {
                 let loadSrc = elem[0]["src"];
                 if(loadSrc.indexOf(AuthAPI.SuccessCallback) > -1) {
-
-
-
-                    $location.path(Views.Home);
-                    scope.$apply();
+                    let code = getQueryString('code', loadSrc);
+                    AuthService.getAccessToken(code).then((res) => {
+                        $location.path(Views.Home);
+                        scope.$apply();
+                    });
                 }
             });
-
         }
     }
 }];
@@ -112,9 +105,11 @@ let ConversationCtrl = ['$scope', ($scope) => {
 'use strict';
 
 
-let HomeCtrl = ['$scope','AuthService','SignalR','Logger', ($scope, AuthService, SignalR, Logger) => {
-    AuthService.getUser().then((user) => {
+let HomeCtrl = ['$scope','UserService','SignalR', ($scope, UserService, SignalR) => {
+    $scope.user = {};
+    UserService.getUser().then((user) => {
         $scope.user = user;
+        $scope.$apply();
     });
     //SignalR.connect().then(() => {
     //    SignalR.greetAll($scope.user.name);
@@ -138,7 +133,7 @@ let Logger = [() => {
 'use strict';
 
 
-let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location) => {
+let NavBar = ['UserService', 'Views','$location', (UserService, Views, $location) => {
     return {
         restrict: 'E',
         templateUrl: 'navbar.html',
@@ -149,7 +144,7 @@ let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location
             };
             scope.navigateTo = view => $location.path(view);
             scope.logout = () => {
-                AuthService.logout();
+                UserService.logout();
                 $location.path(Views.SignOn);
             };
         }
@@ -174,10 +169,14 @@ let RedditAuthCtrl = ['$scope','$sce','AuthService','Logger', ($scope, $sce, Aut
 'use strict';
 
 
-let SignOnCtrl = ['$scope', '$location','AuthService','Views','$sce', ($scope, $location, AuthService, Views, $sce) => {
+let SignOnCtrl = ['$scope', '$location','Views','UserService', ($scope, $location, Views, UserService) => {
     $scope.user = { name: "" , password: ""};
-    $scope.signIn = (user) => {
-        AuthService.setUser(user);
+    UserService.getLoginStatus().then(function(resp) {
+        if(resp.data["loggedIn"]) {
+            $location.path(Views.Home);
+        }
+    });
+    $scope.signIn = () => {
         $location.path(Views.ConfirmSignOn);
     }
 }];
@@ -227,6 +226,58 @@ let SubRedditCtrl = ['$scope','$location', ($scope, $location) => {
     $scope.navigateTo = subRedditUrl => $location.path(subRedditUrl);
 }];
 /**
+ * Created by ben on 12/17/15.
+ */
+let UserService = ['UserAPI','Storage','$http', (UserAPI,Storage,$http) => {
+    "use strict";
+
+    let service = {};
+
+    service.login = () => {
+        return new Promise((resolve,reject) => {
+            $http.post(UserAPI.LoginUrl,{}).then((resp) => {
+                service.setUser(resp.data).then(() => {
+                    resolve(resp.data);
+                });
+            });
+        });
+    };
+
+    service.logout = () => {
+        return new Promise((resolve,reject) => {
+            $http.post(UserAPI.LogoutUrl,{}).then((resp) => {
+                Storage.Local.get(Storage.UserKey, (data) => {
+                    delete data[Storage.UserKey];
+                    Storage.Local.set(data);
+                });
+                resolve(resp);
+            });
+        });
+    };
+
+    service.getLoginStatus = () => {
+        return $http.get(UserAPI.StatusUrl);
+    };
+
+    service.setUser = (user) => {
+        let data = {};
+        data[Storage.UserKey] = user;
+        return new Promise((resolve,reject) => {
+            Storage.Local.set(data, () => { resolve() });
+        });
+    };
+
+    service.getUser = () => {
+        return new Promise((resolve,reject) => {
+            Storage.Local.get(Storage.UserKey, (data) => {
+                resolve(data[Storage.UserKey]);
+            });
+        });
+    };
+
+    return service;
+}];
+/**
  * Created by ben on 11/20/15.
  */
 'use strict';
@@ -248,6 +299,7 @@ const RedditChatApp =
     })
     .config(AppConfig)
     .factory('AuthService', AuthService)
+    .factory('UserService', UserService)
     .factory('Logger', Logger)
     .directive('navBar', NavBar)
     .directive('authWebView', AuthWebView)
@@ -264,8 +316,14 @@ const RedditChatApp =
         HubName: 'chatHub'
     })
     .constant('AuthAPI', {
-        Url: 'http://localhost:3000/authorize',
+        InitialReqUrl: 'http://localhost:3000/authorize/initial',
+        AccessTokenUrl: 'http://localhost:3000/authorize/access_token',
         SuccessCallback: 'http://localhost:3000/authorize/reddit_callback'
+    })
+    .constant('UserAPI', {
+        LoginUrl: 'http://localhost:3000/users/login',
+        LogoutUrl: 'http://localhost:3000/users/logout',
+        StatusUrl: 'http://localhost:3000/users/status'
     })
     .constant('Views', {
         Home: '/home',

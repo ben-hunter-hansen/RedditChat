@@ -20,6 +20,7 @@ const RedditChatApp =
     })
     .config(AppConfig)
     .factory('AuthService', AuthService)
+    .factory('UserService', UserService)
     .factory('Logger', Logger)
     .directive('navBar', NavBar)
     .directive('authWebView', AuthWebView)
@@ -36,8 +37,14 @@ const RedditChatApp =
         HubName: 'chatHub'
     })
     .constant('AuthAPI', {
-        Url: 'http://localhost:3000/authorize',
+        InitialReqUrl: 'http://localhost:3000/authorize/initial',
+        AccessTokenUrl: 'http://localhost:3000/authorize/access_token',
         SuccessCallback: 'http://localhost:3000/authorize/reddit_callback'
+    })
+    .constant('UserAPI', {
+        LoginUrl: 'http://localhost:3000/users/login',
+        LogoutUrl: 'http://localhost:3000/users/logout',
+        StatusUrl: 'http://localhost:3000/users/status'
     })
     .constant('Views', {
         Home: '/home',

@@ -28,11 +28,6 @@ let AppConfig = ['$routeProvider', $routeProvider => {
         }).otherwise({redirectTo: '/signon'});
 }];
 
-let AppStart = ['AuthService', '$location','$rootScope','Views','Logger', (AuthService,$location,$rootScope,Views,Logger) => {
+let AppStart = ['UserService', '$location','$rootScope','Views','Logger', (UserService,$location,$rootScope,Views,Logger) => {
 
-    $rootScope.$on('$routeChangeStart', () => {
-        AuthService.getUser().then((user) => {
-            if(!user) $location.path(Views.SignOn);
-        });
-    });
 }];

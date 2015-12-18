@@ -4,7 +4,7 @@
 'use strict';
 
 
-let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location) => {
+let NavBar = ['UserService', 'Views','$location', (UserService, Views, $location) => {
     return {
         restrict: 'E',
         templateUrl: 'navbar.html',
@@ -15,7 +15,7 @@ let NavBar = ['AuthService', 'Views','$location', (AuthService, Views, $location
             };
             scope.navigateTo = view => $location.path(view);
             scope.logout = () => {
-                AuthService.logout();
+                UserService.logout();
                 $location.path(Views.SignOn);
             };
         }

@@ -4,10 +4,13 @@
 'use strict';
 
 
-let HomeCtrl = ['$scope','AuthService','SignalR','Logger', ($scope, AuthService, SignalR, Logger) => {
-    AuthService.getUser().then((user) => {
+let HomeCtrl = ['$scope','UserService','SignalR', ($scope, UserService, SignalR) => {
+    $scope.user = {};
+    UserService.getUser().then((user) => {
         $scope.user = user;
+        $scope.$apply();
     });
+
     //SignalR.connect().then(() => {
     //    SignalR.greetAll($scope.user.name);
     //}).catch((err) => Logger.warn(err));
