@@ -3,12 +3,12 @@ module.exports = function(grunt) {
     grunt.initConfig({
         concat: {
             dist: {
-                src: ['src/*.js'],
+                src: ['src/**/*.js'],
                 dest: 'resources/scripts/app.js'
             }
         },
         watch: {
-            files: ['src/*.js'],
+            files: ['src/*/*.js'],
             tasks: ['concat']
         }
     });

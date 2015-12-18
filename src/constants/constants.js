@@ -30,9 +30,16 @@ const Views = {
     Conversations: '/conversations'
 };
 
+const Storage = {
+    UserKey: 'RedditChat_USR',
+    Local: chrome.storage.local
+};
+
+
 const ConstantsModule =
     angular.module('RedditChat.Constants', [])
         .constant('AuthAPI', AuthAPI)
         .constant('UserAPI', UserAPI)
         .constant('ChatAPI', ChatAPI)
-        .constant('Views', Views);
+        .constant('Views', Views)
+        .constant('Storage', Storage);
