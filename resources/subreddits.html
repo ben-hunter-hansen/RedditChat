@@ -1,27 +1,29 @@
-<div class="row">
-    <div class="col-xs-8">
-        <div class="input-group">
-            <span class="input-group-addon">/r/</span>
-            <input type="text" class="form-control" placeholder="search for a subreddit">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-8">
+            <div class="input-group">
+                <span class="input-group-addon">/r/</span>
+                <input type="text" class="form-control" placeholder="search for a subreddit">
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary active">subscribed</button>
+                <button type="button" class="btn btn-default">all</button>
+            </div>
         </div>
     </div>
-    <div class="col-xs-4">
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary active">subscribed</button>
-            <button type="button" class="btn btn-default">all</button>
-        </div>
-    </div>
-</div>
-<br>
-<div class="row">
-    <div class="col-xs-12">
-        <div class="list-group subreddit-list">
-            <a href="" ng-click="navigateTo(sub.url)" class="list-group-item" ng-class="{'active': $index === 0}" ng-repeat="sub in subReddits">
-                <h4 class="list-group-item-heading">/r/{{sub.title}}</h4>
-                <p class="list-group-item-text">
-                    <span class="badge">{{sub.numActive}}</span>&nbsp;active threads
-                </p>
-            </a>
+    <br>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="list-group subreddit-list">
+                <a href="" ng-click="navigateTo(sub.url)" class="list-group-item" ng-class="{'active': $index === 0}" ng-repeat="sub in subReddits">
+                    <h4 class="list-group-item-heading">/r/{{sub.title}}</h4>
+                    <p class="list-group-item-text">
+                        <span class="badge">{{sub.numActive}}</span>&nbsp;active threads
+                    </p>
+                </a>
+            </div>
         </div>
     </div>
 </div>
