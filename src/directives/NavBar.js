@@ -13,6 +13,7 @@ let NavBar = ['UserService', 'Views','$location', (UserService, Views, $location
             scope.isLoggedIn = () => {
                 return ($location.path() !== Views.SignOn) && ($location.path() !== Views.ConfirmSignOn);
             };
+            scope.$location = $location;
             scope.navigateTo = view => $location.path(view);
             scope.logout = () => {
                 UserService.logout();

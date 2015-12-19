@@ -1,5 +1,53 @@
 <div class="container-fluid">
     <div class="row">
-        <h1 class="text-center">Welcome, /u/{{user.name}}!</h1>
+        <div class="col-xs-7 col-sm-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">unread messsages</h3>
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="#">
+                                    <img class="media-object" src="images/icon-48.png" alt="...">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h4 class="media-heading">Subject</h4>
+                                Preview text
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="#">
+                                    <img class="media-object" src="images/icon-48.png" alt="...">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h4 class="media-heading">Subject</h4>
+                                Preview text
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-xs-5 col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">/u/{{user.name}}</h3>
+                </div>
+                <div class="panel-body">
+                    <img class="img-responsive center-block" src="images/icon-128.png">
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item">link karma: <span class="pull-right"><span class="badge">44</span></span></li>
+                    <li class="list-group-item">comment karma: <span class="pull-right"><span class="badge">193</span></span></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>

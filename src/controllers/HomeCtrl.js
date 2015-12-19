@@ -11,6 +11,7 @@ let HomeCtrl = ['$scope','UserService','SignalR', ($scope, UserService, SignalR)
         $scope.$apply();
     });
 
+
     //SignalR.connect().then(() => {
     //    SignalR.greetAll($scope.user.name);
     //}).catch((err) => Logger.warn(err));
